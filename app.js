@@ -12,10 +12,37 @@ VERSION = VERSION.substr(0, 9);
 // Will be initialized later.
 var latexOnline;
 var healthMonitor;
+const fs = require('fs');
+const newpath = '/tmp/downloads/';
+const newpath2 = '/tmp/storage/';
+
+function checkAndRemove(path, callback) {
+    fs.exists(path, (exists) => {
+        if (exists) {
+            fs.rm(path, { recursive: true, force: true }, (err) => {
+                if (err) {
+                    console.error(`Error removing ${path}:`, err);
+                } else {
+                    console.log(`${path} is deleted!`);
+                    callback();
+                }
+            });
+        } else {
+            callback();
+        }
+    });
+}
+
+checkAndRemove(newpath, () => {
+    checkAndRemove(newpath2, () => {
+        LatexOnline.create(newpath, newpath2)
+            .then(onInitialized);
+    });
+});
 
 // Initialize service dependencies.
-LatexOnline.create('/tmp/downloads/', '/tmp/storage/')
-    .then(onInitialized)
+// LatexOnline.create('/tmp/downloads/', '/tmp/storage/')
+//     .then(onInitialized)
 
 function onInitialized(latex) {
     latexOnline = latex;
